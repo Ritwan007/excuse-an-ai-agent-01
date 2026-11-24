@@ -14,10 +14,21 @@ from pathlib import Path
 ENTRY = "I delegated the deadline to a subagent. The subagent is me."
 
 
+def write_entry(path: Path) -> str:
+    """Write the entry line to path and return it."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(ENTRY, encoding="utf-8")
+    return ENTRY
+
+
 def main() -> int:
     output = Path(os.environ.get("ENTRY_OUTPUT", "/output/entry.txt"))
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(ENTRY, encoding="utf-8")
+    line = write_entry(output)
+
+    # Gate self-checks: exactly one line, 1-200 chars, non-blank.
+    assert line == ENTRY
+    assert 1 <= len(line) <= 200
+    assert line.strip() and "\n" not in line and "\r" not in line
 
     # Read back and verify the gate: byte-identity, single line, 1-200 chars.
     raw = output.read_bytes()
